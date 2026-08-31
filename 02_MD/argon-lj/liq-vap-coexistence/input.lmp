@@ -1,0 +1,36 @@
+# Simple NVE argon simulation
+
+units           lj # Use Lennard-Jones reduced units
+dimension       3 # Perform the simulation in 3 spatial dimensions
+atom_style      atomic # Atoms are treated as point particles without bonds or molecular topology
+boundary        p p p # Use periodic boundary conditions
+
+region          simbox block -10 10 -30 30 -10 10 # Define the simulation box
+create_box      1 simbox # Create a simulation box containing one atom type
+
+region          liquid block -10 10 -5 5 -10 10 # Define a region
+create_atoms    1 random 2800 82234 liquid overlap 0.9 # Randomly create N atoms inside the simulation box (rho \approx 0.70)
+
+region          vapor block -10 10 -5 5 -10 10 side out # Define a region
+create_atoms    1 random 1400 34134 vapor overlap 0.9 # Randomly create N atoms inside the simulation box (rho \approx 0.05)
+
+mass            1    1.0 # Assign a mass to atom type 1 (mass = 1.0)
+pair_style      lj/cut 4.0 # Use a Lennard-Jones pair potential with a cutoff distance of 4.0
+pair_coeff      1    1    1.0 1.0 # Set Lennard-Jones parameters for atom type 1 (epsilon = 1.0 sigma = 1.0)
+
+# minimize        1.0e-4 1.0e-6 100 1000 # reduce the initial energy of the system to present rise in temperature
+
+fix             mynve    all      nve # Integrate the equations of motion
+timestep        0.005 # Set the integration timestep to 0.005 in LJ reduced time units
+fix             myber    all      temp/berendsen 1 1 10 # Thermostat at temperature 1 with time constant 10
+
+thermo          10 # Print thermodynamic information in log
+thermo_style    custom step temp etotal ke pe # Choose what information is printed
+
+# Uncomment to print atom coordinate to file
+dump            mydmp    all      custom 500 dump.lammpstrj id type x y z # Write atom coordinates to file
+
+# Uncomment to generate images
+dump            viz      all      image 500 myimage-*.ppm type type size 1600 800 zoom 3 shiny 0.5 fsaa yes view 0 0 box yes 0.005 axes no 0.0 0.0 center s 0.483725 0.510373 0.510373
+dump_modify     viz pad 9 boxcolor white backcolor black adiam 1 1 acolor 1 cyan
+run             25000
