@@ -1,0 +1,32 @@
+# LAMMPS Input File
+# Licensed under CC BY 4.0
+# See more in "A Set of Materials-Science Tutorials for the LAMMPS Simulation Package: 2. Materials Science"
+# By Simon Gravelle, Mark A. Tschopp, Jacob R. Gissinger, and Axel Kohlmeyer
+
+# 1) Initialization
+units           metal # Use metal units: distance in Å, time in ps, energy in eV, and temperature in K
+atom_style      atomic # Treat atoms as point particles without charge or molecular topology
+boundary        p p p # Apply periodic boundary conditions in all three directions
+
+# 2) System definition
+lattice         diamond 5.760 # Define a diamond cubic lattice with a lattice constant of 5.760 Å
+region          box block 0 4 0 4 0 4 # Define the simulation box as 4 × 4 × 4 lattice units
+create_box      1 box # Create the simulation box with one atom type
+create_atoms    1 box # Fill the simulation box with atoms of type 1
+mass            1    72.63 # Assign the atomic mass of germanium to atom type 1
+
+# 3) Settings
+pair_style      snap # Use the Spectral Neighbor Analysis Potential (SNAP) for interatomic interactions
+pair_coeff      *    *    Ge_Zuo_JPCA2020.snapcoeff Ge_Zuo_JPCA2020.snapparam Ge # Assign the Ge SNAP potential and parameter files to germanium atoms
+
+# 4) Monitoring
+thermo          100 # Output thermodynamic information every 100 timesteps
+# dump            traj     all      atom 100 dump.lammpstrj # Write atomic positions and atom types to a trajectory file every 100 timesteps
+dump            viz      all      image 100 myimage-*.ppm type type shiny 0.1 box no 0.01 view 0 0 zoom 1.8 fsaa yes size 800 800
+dump_modify     viz adiam 1 1 acolor 1 turquoise backcolor white
+
+# 5) Run
+timestep        0.001 # Set the timestep to 0.001 ps, equivalent to 1 fs
+velocity        all create 300.0 49284 mom yes rot yes dist gaussian # Assign initial velocities corresponding to 300 K with a Gaussian distribution and remove net momentum
+fix             mynpt    all      npt temp 300 300 0.1 aniso 0 0 1.0 # Run NPT dynamics at 300 K while allowing anisotropic box relaxation at zero pressure
+run 5000 # Run the simulation for 5000 timesteps
