@@ -11,7 +11,7 @@ You can open the tutorial notebook here:
 ---
 
 ## 📝 AiiDA Exercise
-You can open the exercise notebook here:  
+After completing the tutorial, open the exercise notebook here:  
 👉 [AiiDA Exercise (Google Colab)](https://colab.research.google.com/drive/1bXjCJyR8Kp5K-vwb29WJc94qWYZo8tEj?usp=sharing)
 
 ---
