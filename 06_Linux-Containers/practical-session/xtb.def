@@ -4,13 +4,13 @@ Stage: devel
 
 %files
 
-# Install build tools and some needed dependencies  
-# apt-get is the package manager (i.e : most commonly used tool to install software) 
-# of debian and all debian-based distribution (such as Ubuntu) 
+# Install build tools and some needed dependencies
+# apt-get is the package manager (i.e : most commonly used tool to install software)
+# of debian and all debian-based distribution (such as Ubuntu)
 %post -c /bin/bash
     apt-get -u update
-    apt-get install -y wget gnupg2 bash gcc meson ninja-build git
-    
+    apt-get install -y wget gnupg2 bash gcc meson ninja-build libomp-dev git
+
     # --------------     INTEL COMPILERS     -------------- #
     # This part append intel repository to our list of downloadable software
     # then install required compilers and libraries
@@ -25,7 +25,7 @@ Stage: devel
     # --------------     GNU COMPILERS       -------------- #
     # install open source alternatives
     # apt-get install -y ...
-    # ----------------------------------------------------- #   
+    # ----------------------------------------------------- #
 
     # Download the source code
     cd /opt
@@ -38,29 +38,12 @@ Stage: devel
     export FC=ifx
     export CC=icx
     export GIT_SSL_NO_VERIFY=1
-    meson setup build --buildtype=release 
+    meson setup build --buildtype=release
 
     ninja -C build
 
-Bootstrap: docker
-From: ubuntu:24.04
-Stage: final
-
-%files from devel
-    /opt/xtb-bleed/build/ /opt/xtb-bleed/build/
-    /opt/intel/oneapi/compiler/2025.2/lib/libifcore.so.5  /opt/intel/lib/libifcore.so.5
-    /opt/intel/oneapi/mkl/latest/lib/libmkl_intel_lp64.so.2  /opt/intel/lib/libmkl_intel_lp64.so.2
-    /opt/intel/oneapi/mkl/latest/lib/libmkl_intel_thread.so.2  /opt/intel/lib/libmkl_intel_thread.so.2
-    /opt/intel/oneapi/mkl/latest/lib/libmkl_core.so.2  /opt/intel/lib/libmkl_core.so.2
-    /opt/intel/oneapi/mkl/2025.2/lib/libmkl_avx2.so.2  /opt/intel/lib/libmkl_avx2.so.2
-    /opt/intel/oneapi/mkl/2025.2/lib/libmkl_def.so.2  /opt/intel/lib/libmkl_def.so.2
-    /opt/intel/oneapi/compiler/2025.2/lib/libimf.so  /opt/intel/lib/libimf.so
-    /opt/intel/oneapi/compiler/2025.2/lib/libiomp5.so  /opt/intel/lib/libiomp5.so
-    /opt/intel/oneapi/compiler/2025.2/lib/libsvml.so  /opt/intel/lib/libsvml.so
-    /opt/intel/oneapi/compiler/2025.2/lib/libintlc.so.5  /opt/intel/lib/libintlc.so.5
-
 %environment
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/intel/lib/"
+   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/intel/oneapi/mkl/2026.1/lib/:/opt/intel/oneapi/mkl/latest/lib:/opt/intel/oneapi/compiler/2026.1/lib/"
 
 %runscript
     /opt/xtb-bleed/build/xtb $*
